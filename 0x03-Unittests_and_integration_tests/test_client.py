@@ -19,7 +19,7 @@ class TestGithubOrgClient(unittest.TestCase):
         result = client.org
 
         self.assertEqual(result, test_payload)
-        mock_get_json.assert_called_once()
+        mock_get_json.assert_called_once()   # <-- no hardcoded URL
 
     @patch.object(GithubOrgClient, "_public_repos_url", new_callable=PropertyMock)
     @patch("client.get_json")
