@@ -10,30 +10,37 @@ class TestGithubOrgClient(unittest.TestCase):
     """Unit tests for GithubOrgClient"""
 
     @patch("client.get_json")
-    def test_public_repos(self, mock_get_json):
+    def test_org(self, mock_get_json):
+        """Test org property returns expected data"""
+        test_payload = {"login": "test-org"}
+        mock_get_json.return_value = test_payload
+
+        client = GithubOrgClient("test-org")
+        result = client.org
+
+        self.assertEqual(result, test_payload)
+        mock_get_json.assert_called_once()
+
+    @patch.object(GithubOrgClient, "_public_repos_url", new_callable=PropertyMock)
+    @patch("client.get_json")
+    def test_public_repos(self, mock_get_json, mock_url):
         """Test public_repos returns expected list of repos"""
-        # Arrange - fake payload
         test_payload = [
             {"name": "repo1"},
             {"name": "repo2"},
             {"name": "repo3"}
         ]
         mock_get_json.return_value = test_payload
+        mock_url.return_value = "http://fake-url.com"
 
-        # Patch _public_repos_url to return a fixed URL
-        with patch.object(GithubOrgClient, "_public_repos_url", new_callable=PropertyMock) as mock_url:
-            mock_url.return_value = "http://fake-url.com"
+        client = GithubOrgClient("test-org")
+        result = client.public_repos()
 
-            # Act
-            client = GithubOrgClient("test-org")
-            result = client.public_repos()
+        expected = ["repo1", "repo2", "repo3"]
+        self.assertEqual(result, expected)
 
-            # Assert
-            expected = ["repo1", "repo2", "repo3"]
-            self.assertEqual(result, expected)
-
-            mock_get_json.assert_called_once_with("http://fake-url.com")
-            mock_url.assert_called_once()
+        mock_get_json.assert_called_once_with("http://fake-url.com")
+        mock_url.assert_called_once()
 
 
 if __name__ == "__main__":
