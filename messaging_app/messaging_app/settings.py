@@ -1,3 +1,7 @@
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -40,19 +44,10 @@ TEMPLATES = [
 ]
 
 REST_FRAMEWORK = {
-    # Default authentication schemes
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.BasicAuthentication',
-        'rest_framework.authentication.TokenAuthentication',  # optional, if using DRF tokens
-    ],
-
-    # Default permissions
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',  # require login for all API endpoints
-    ],
+        'rest_framework.permissions.AllowAny',
+    ]
 }
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
