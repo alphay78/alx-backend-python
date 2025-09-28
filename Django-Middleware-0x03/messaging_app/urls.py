@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from chats import auth as chats_auth
+from messaging_app.chats import auth as chats_auth
 
 urlpatterns = [
     path('admin/', admin.site.urls),
