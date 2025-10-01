@@ -1,6 +1,5 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import redirect
 from django.http import HttpResponse
 
 User = get_user_model()
@@ -13,5 +12,5 @@ def delete_user(request):
     """
     user = request.user
     username = user.username
-    user.delete()
+    user.delete()  # this will fire the post_delete signal
     return HttpResponse(f"User {username} and all related data have been deleted.")
