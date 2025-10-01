@@ -1,16 +1,34 @@
-from django.contrib.auth import get_user_model
-from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
+from django.shortcuts import render, get_object_or_404
+from django.views.decorators.cache import cache_page
+from django.db.models import Prefetch
+from messaging.models import Message
 
-User = get_user_model()
 
-@login_required
-def delete_user(request):
-    """
-    Allow a logged-in user to delete their account.
-    Triggers the post_delete signal to clean up related data.
-    """
+@cache_page(60)  # cache the view for 60 seconds
+def conversation_list(request):
     user = request.user
-    username = user.username
-    user.delete()  # this will fire the post_delete signal
-    return HttpResponse(f"User {username} and all related data have been deleted.")
+    messages = Message.objects.filter(recipient=user).select_related('sender')
+    return render(request, 'chats/conversation_list.html', {'messages': messages})
+
+
+def get_threaded_conversation(message_id):
+    """
+    Fetch a message and all its replies recursively in a threaded format.
+    """
+    root_message = get_object_or_404(Message.objects.select_related('sender', 'recipient'), pk=message_id)
+
+    # Prefetch replies
+    root_message = Message.objects.prefetch_related(
+        Prefetch('replies', queryset=Message.objects.select_related('sender', 'recipient'))
+    ).get(pk=message_id)
+
+    def fetch_replies(msg):
+        return {
+            "id": msg.id,
+            "sender": msg.sender.username,
+            "recipient": msg.recipient.username,
+            "content": msg.content,
+            "replies": [fetch_replies(reply) for reply in msg.replies.all()]
+        }
+
+    return fetch_replies(root_message)

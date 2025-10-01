@@ -12,7 +12,7 @@ def log_message_edit(sender, instance, **kwargs):
     Log message edits before saving.
     """
     if not instance.pk:
-        return  # new message, no edit
+        return  # New message
 
     try:
         old_message = Message.objects.get(pk=instance.pk)
@@ -31,18 +31,15 @@ def log_message_edit(sender, instance, **kwargs):
 @receiver(post_delete, sender=User)
 def delete_user_related_data(sender, instance, **kwargs):
     """
-    Delete all messages, notifications, and histories for a user
-    when the user account is deleted.
+    Delete all messages, notifications, and histories for a user.
     """
-    # Fetch all messages where user is sender or recipient
+    # All messages sent or received by user
     messages = Message.objects.filter(sender=instance) | Message.objects.filter(recipient=instance)
-    message_ids = list(messages.values_list('id', flat=True))  # store IDs before deletion
-
-    # Delete messages
+    message_ids = list(messages.values_list('id', flat=True))
     messages.delete()
 
-    # Delete notifications for this user
+    # Notifications
     Notification.objects.filter(user=instance).delete()
 
-    # Delete all message histories related to these messages
+    # Related message histories
     MessageHistory.objects.filter(message_id__in=message_ids).delete()
