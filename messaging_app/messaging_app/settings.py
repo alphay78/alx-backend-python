@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'django_filters',
     'chats',
+    'messaging.apps.MessagingConfig',
 ]
 
 REST_FRAMEWORK = {
@@ -58,6 +59,13 @@ REST_FRAMEWORK = {
 }
 
 
+# Add or update cache settings
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+    }
+}
 
 
 
